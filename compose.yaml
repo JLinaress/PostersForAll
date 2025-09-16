@@ -1,0 +1,7 @@
+﻿services:
+  postersforall:
+    image: postersforall
+    build:
+      context: .
+      dockerfile: PostersForAll/Dockerfile
+
