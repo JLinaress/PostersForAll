@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Hello, Let's check our Inventory!");
 
 
 var builder = Host.CreateDefaultBuilder(args)
@@ -17,4 +17,4 @@ var builder = Host.CreateDefaultBuilder(args)
         //register other logic, background workers, repositories, etc.
     });
 
-await builder.Build().RunAsync();
+await builder.RunConsoleAsync();
