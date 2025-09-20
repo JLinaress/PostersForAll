@@ -1,21 +1,24 @@
-﻿// This is where we'll be registering our DbContext and other services for the OrderService application.
+// Register DbContext and Configure Dependency Injection
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using OrderService.Contracts;
 using OrderService.Data;
-using Microsoft.Extensions.Hosting;
 
+Console.WriteLine("Hello, Let's check our Orders!");
 
-Console.WriteLine("Hello, Order Posters!");
+var builder = WebApplication.CreateBuilder(args);
 
-var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        // Add services to container.
-        services.AddDbContext<OrdersContext> (options => 
-            options.UseSqlite("Data Source=orders.db"));
-        
-        //register other logic, background workers, repositories, etc.
-    });
-    
-await builder.Build().RunAsync();
+// Add DbContext with SQLite
+builder.Services.AddDbContext<OrdersContext>(options =>
+    options.UseSqlite("Data Source=orders.db"));
+
+// Register other services, repositories, etc.
+builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.MapControllers();
+
+app.Run();
