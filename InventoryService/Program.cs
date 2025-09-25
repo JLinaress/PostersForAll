@@ -1,20 +1,28 @@
-﻿// This is where we'll be registering our DbContext and other services for the InventoryService application.
+// Register DbContext and Configure Dependency Injection
 
+using InventoryService.Contracts;
 using InventoryService.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using InventoryServices = InventoryService.Services.InventoryService;
 
-Console.WriteLine("Hello, Let's check our Inventory!");
+Console.WriteLine("Hello, Lets check our Inventory!");
 
+var builder = WebApplication.CreateBuilder(args);
 
-var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        services.AddDbContext<InventoryContext>(options =>
-            options.UseSqlite("Data Source=inventory.db"));
-        
-        //register other logic, background workers, repositories, etc.
-    });
+// Add services to the container.
+builder.Services.AddOpenApi();
 
-await builder.RunConsoleAsync();
+// Add DbContext with SQLite
+builder.Services.AddDbContext<InventoryContext>(options => 
+    options.UseSqlite("Data Source=inventory.db"));
+    
+// Register other services, repositories, etc.
+builder.Services.AddScoped<IInventoryService, InventoryServices>();
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.MapControllers();
+
+app.Run();

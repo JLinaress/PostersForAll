@@ -1,6 +1,5 @@
-// Business logic for managing orders
-// This class will implement methods to place, retrieve, and cancel orders
-
+// Business logic for managing inventory
+// This class will implement methods to create, retrieve, and cancel orders
 
 namespace OrderService.Services;
 

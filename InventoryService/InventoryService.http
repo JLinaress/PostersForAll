@@ -1,0 +1,6 @@
+@InventoryService_HostAddress = http://localhost:5224
+
+GET {{InventoryService_HostAddress}}/api/inventory/
+Accept: application/json
+
+###
