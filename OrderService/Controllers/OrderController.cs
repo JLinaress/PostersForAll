@@ -1,8 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using OrderService.Contracts;
-using OrderService.Models;
+// This is a bridge between HTTP requests and the business logic or services that process those requests
 
 namespace OrderService.Controllers;
+
+using Microsoft.AspNetCore.Mvc;
+using Contracts;
+using Models;
 
 [ApiController]
 [Route("api/orders")]

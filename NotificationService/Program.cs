@@ -1,21 +1,28 @@
-﻿// This is where we'll be registering our DbContext and other services for the NotificationService application.
+// Register DbContext and Configure Dependency Injection
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using NotificationService.Contracts;
 using NotificationService.Data;
+using NotificationServices = NotificationService.Services.NotificationService;
 
 Console.WriteLine("Hello, You've got a Notification!");
 
+var builder = WebApplication.CreateBuilder(args);
 
-var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        // Add services to container.
-        services.AddDbContext<NotificationContext> (options => 
-            options.UseSqlite("Data Source=notification.db"));
-        
-        //register other logic, background workers, repositories, etc.
-    });
+// Add services to the container.
+builder.Services.AddOpenApi();
 
-await builder.Build().RunAsync();
+// Add DbContext with SQLite
+builder.Services.AddDbContext<NotificationContext>(options =>
+    options.UseSqlite("Data Source=notifications.db"));
+
+// Register other services, repositories, etc.
+builder.Services.AddScoped<INotificationService, NotificationServices>();
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.MapControllers();
+
+app.Run();

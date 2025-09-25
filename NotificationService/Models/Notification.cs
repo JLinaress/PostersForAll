@@ -6,9 +6,9 @@ public class Notification
 {
     public int Id { get; set; }
     
-    public string Message { get; set; }
+    public string? Message { get; set; }
     
-    public string Type { get; set; } //Success, Error, Info
+    public string? Type { get; set; } // Success, Failure, Info
     
     public DateTime CreatedAt { get; set; }
 }

@@ -11,7 +11,7 @@ using NotificationService.Data;
 namespace NotificationService.Migrations
 {
     [DbContext(typeof(NotificationContext))]
-    [Migration("20250917224400_InitialCreate")]
+    [Migration("20250925204902_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -30,11 +30,9 @@ namespace NotificationService.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

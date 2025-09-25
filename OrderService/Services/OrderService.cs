@@ -1,9 +1,13 @@
-using Microsoft.EntityFrameworkCore;
-using OrderService.Contracts;
-using OrderService.Data;
-using OrderService.Models;
+// Business logic for managing orders
+// This class will implement methods to place, retrieve, and cancel orders
+
 
 namespace OrderService.Services;
+
+using Microsoft.EntityFrameworkCore;
+using Contracts;
+using Data;
+using Models;
 
 public class OrderService : IOrderService
 {
