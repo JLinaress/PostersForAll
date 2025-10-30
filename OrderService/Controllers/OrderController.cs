@@ -1,4 +1,5 @@
 // This is a bridge between HTTP requests and the business logic or services that process those requests
+// API Endpoints for managing orders, including creating, retrieving, and canceling orders.
 
 namespace OrderService.Controllers;
 
