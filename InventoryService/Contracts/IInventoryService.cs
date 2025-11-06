@@ -1,8 +1,7 @@
 // Logic layer interface for inventory management operations
-
-using InventoryService.Models;
-
 namespace InventoryService.Contracts;
+
+using Models;
 
 public interface IInventoryService
 {

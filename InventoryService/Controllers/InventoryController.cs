@@ -1,6 +1,5 @@
 // Business logic for inventory management
 // This class will implement methods for adding, updating, and retrieving inventory items
-
 namespace InventoryService.Controllers;
 
 using Contracts;

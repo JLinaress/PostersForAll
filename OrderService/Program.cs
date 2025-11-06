@@ -18,7 +18,6 @@ builder.Services.AddDbContext<OrdersContext>(options =>
 
 // Register other services, repositories, etc.
 builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
-builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
 // Register Kafka Producer Service with environment variable configuration
 builder.Services.Configure<KafkaSettings>(
