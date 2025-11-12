@@ -21,7 +21,7 @@ builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
 
 // Register Kafka Producer Service with environment variable configuration
 builder.Services.Configure<KafkaSettings>(
-    builder.Configuration.GetSection("Kafka"));
+    builder.Configuration.GetSection("Kafka:Topic"));
 builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
 builder.Services.AddControllers();

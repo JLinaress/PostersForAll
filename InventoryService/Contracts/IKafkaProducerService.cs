@@ -5,5 +5,5 @@ namespace InventoryService.Contracts;
 
 public interface IKafkaProducerService
 {
-    public Task ProduceInventoryEventMessageAsync(string topic, string message);
+    public Task ProduceInventoryEventMessageAsync(string key, string message);
 }

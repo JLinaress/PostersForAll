@@ -13,8 +13,7 @@ public class KafkaProducerService : IKafkaProducerService
     
     public KafkaProducerService(IOptions<KafkaConsumerSettings> kafkaSettings, IKafkaProducerClient producer)
     {
-        var settings = kafkaSettings.Value;
-        _topic = settings.Topic!;
+        _topic = kafkaSettings.Value.Topic!;
         _producer = producer;
     }
 
@@ -25,7 +24,7 @@ public class KafkaProducerService : IKafkaProducerService
             var deliveryResult = await _producer.ProduceAsync(_topic, key, message);
 
             // Log the inventory event message delivery
-            Console.WriteLine($"Inventory event message delivered to {deliveryResult.TopicPartitionOffset}");
+            Console.WriteLine($"Inventory event message with key '{deliveryResult.Key}' delivered to {deliveryResult.TopicPartitionOffset}");
         }
         catch (KafkaException kex)
         {

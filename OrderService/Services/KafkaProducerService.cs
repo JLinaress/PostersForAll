@@ -1,12 +1,11 @@
 // This service will handle producing messages to Kafka topics.
 // It will include methods to send messages related to order events, such as order creation and updates
+namespace OrderService.Services;
 
 using Confluent.Kafka;
 using Microsoft.Extensions.Options;
-using OrderService.Configuration;
-using OrderService.Contracts;
-
-namespace OrderService.Services;
+using Configuration;
+using Contracts;
 
 public class KafkaProducerService : IKafkaProducerService
 {
@@ -16,7 +15,7 @@ public class KafkaProducerService : IKafkaProducerService
     public KafkaProducerService(IOptions<KafkaSettings> kafkaSettings)
     {
         var settings = kafkaSettings.Value;
-        _topic = settings.Topic;
+        _topic = settings.Topic!;
         
         var config = new ProducerConfig
         {
