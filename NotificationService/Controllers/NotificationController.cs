@@ -1,26 +1,39 @@
 // This is a bridge between HTTP requests and the business logic or services that process those requests
-
 namespace NotificationService.Controllers;
 
-using Microsoft.AspNetCore.Mvc;
 using Contracts;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using System.Text.Json;
 
 [ApiController]
 [Route("api/notifications")]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _notificationService;
+    private readonly IKafkaProducerService _kafkaProducerService;
     
-    public NotificationController(INotificationService notificationService)
+    public NotificationController(INotificationService notificationService, IKafkaProducerService kafkaProducerService)
     {
         _notificationService = notificationService;
+        _kafkaProducerService = kafkaProducerService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendNotification([FromQuery] string message, [FromQuery] string type)
+    public async Task<IActionResult> SendKafkaNotification([FromBody] NotificationEventPayload payload)
     {
-        await _notificationService.SendNotificationAsync(message, type);
-        return Ok(new { Status = "Notification Sent" });
+        var notification = _notificationService.CreateAndSendNotificationAsync(payload.NotificationMessage!, payload.NotificationType!, payload.NotificationId);
+
+        if (notification == null)
+        {
+            return StatusCode(500, "Failed to create notification");
+        }
+        
+        await _kafkaProducerService.ProduceNotificationEventAsync(
+            payload.NotificationId.ToString(),
+            JsonSerializer.Serialize(payload));
+        
+        return CreatedAtAction(nameof(GetNotificationById), new { id = payload.NotificationId }, payload);
     }
 
     [HttpGet]
@@ -41,7 +54,7 @@ public class NotificationController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddNotification([FromBody] Models.Notification notification)
+    public async Task<IActionResult> AddNotification([FromBody] Notification notification)
     {
         var createdNotification = await _notificationService.AddNotificationAsync(notification);
 

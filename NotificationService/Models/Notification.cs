@@ -1,12 +1,11 @@
 // Using Object-Relational Mapping (ORM) to bridge between SQL tables and objects-oriented entities.
+namespace NotificationService.Models;
 
 using System.ComponentModel.DataAnnotations;
 
-namespace NotificationService.Models;
-
 public class Notification
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     
     [StringLength(50)] // Message max length 50 characters
     public string? Message { get; set; }

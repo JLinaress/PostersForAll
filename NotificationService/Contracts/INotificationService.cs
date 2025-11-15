@@ -1,12 +1,11 @@
 // Logic layer interface for notification management operations
-
 namespace NotificationService.Contracts;
 
 using Models;
 
 public interface INotificationService
 {
-    Task SendNotificationAsync(string message, string type);
+    Task CreateAndSendNotificationAsync(string message, string type, Guid userId);
     
     Task<List<Notification>> GetAllNotificationsAsync();
     
