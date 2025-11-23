@@ -4,7 +4,7 @@ namespace InventoryService.Contracts;
 
 using Confluent.Kafka;
 
-public interface IKafkaConsumerClient
+public interface IKafkaConsumerClient : IDisposable
 {
     void Subscribe(string topic);
     

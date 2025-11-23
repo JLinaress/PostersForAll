@@ -1,5 +1,6 @@
 // Register DbContext and Configure Dependency Injection
 using Confluent.Kafka;
+using InventoryService.Configurations;
 using InventoryService.Contracts;
 using InventoryService.Data;
 using InventoryService.Messaging.Clients;
@@ -29,7 +30,7 @@ builder.Services.AddSingleton<IConsumer<string, string>>(sp =>
     var config = new ConsumerConfig
     {
         BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "localhost:9092",
-        GroupId = Environment.GetEnvironmentVariable("KAFKA_CONSUMER_GROUP_ID") ?? "inventory-service-group",
+        GroupId = Environment.GetEnvironmentVariable("KAFKA_CONSUMER_GROUP_ID") ?? "inventory-service-consumer",
         AutoOffsetReset = AutoOffsetReset.Earliest
     };
     return new ConsumerBuilder<string, string>(config).Build();
@@ -49,6 +50,7 @@ builder.Services.AddSingleton<IProducer<string, string>>(sp =>
 builder.Services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
 builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddSingleton<IMessageHandlerService, MessageHandlerService>();
+builder.Services.Configure<KafkaConsumerSettings>(builder.Configuration.GetSection("KafkaConsumerSettings"));
 
 // Kafka client wrapper
 builder.Services.AddSingleton<IKafkaConsumerClient, KafkaConsumerClient>();

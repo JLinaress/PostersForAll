@@ -5,9 +5,9 @@ using Models;
 
 public interface IInventoryService
 {
-    Task<List<InventoryItem>> GetAllInventoryItemsAsync();
+    Task<List<InventoryItem>> GetInventoryItemsAsync();
     
-    Task<InventoryItem?> GetInventoryItemBySkuAsync(string sku);
+    Task<InventoryItem?> GetInventoryItemByProductIdAsync(Guid product);
     
-    Task<InventoryItem> AddOrUpdateInventoryItemAsync(InventoryItem item);
+    Task<InventoryUpdateResult> AddOrUpdateInventoryItemAsync(InventoryUpdateEvent update);
 }
