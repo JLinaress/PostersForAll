@@ -1,3 +1,5 @@
+// Using Object-Relational Mapping (ORM) to bridge between SQL tables and objects-oriented entities.
+// DTO (Data Transfer Object) for transferring notification event data.
 namespace NotificationService.Models;
 
 using System.Text.Json.Serialization;

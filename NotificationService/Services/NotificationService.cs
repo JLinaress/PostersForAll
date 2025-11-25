@@ -19,19 +19,17 @@ public class NotificationService : INotificationService
         _kafkaProducer = kafkaProducer;
     }
 
-    public async Task<List<Notification>> GetAllNotificationsAsync()
-    {
-        return await _context.Notifications.ToListAsync();
-    }
+    public async Task<List<Notification>> GetAllNotificationsAsync() =>
+        await _context.Notifications.ToListAsync();
 
-    public async Task<Notification?> GetNotificationByIdAsync(int id)
-    {
-        return await _context.Notifications.FindAsync(id);
-    }
+    public async Task<Notification?> GetNotificationByIdAsync(Guid id) =>
+        await _context.Notifications.FindAsync(id);
 
     public async Task<Notification> AddNotificationAsync(Notification notification)
     {
-        notification.CreatedAt = DateTime.UtcNow;
+        notification.CreatedAt = notification.CreatedAt == default 
+            ? DateTime.UtcNow
+            : notification.CreatedAt;
 
         // Check for existence first
         var exists = await _context.Notifications.AnyAsync(n => n.Id == notification.Id);

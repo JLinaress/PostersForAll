@@ -29,6 +29,7 @@ builder.Services.AddSingleton<IConsumer<string, string>>(sp =>
 {
     var config = new ConsumerConfig
     {
+        // using environment variables for explicit runtime overrides (Helm/Kubernetes secrets or config maps)
         BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "localhost:9092",
         GroupId = Environment.GetEnvironmentVariable("KAFKA_CONSUMER_GROUP_ID") ?? "inventory-service-consumer",
         AutoOffsetReset = AutoOffsetReset.Earliest

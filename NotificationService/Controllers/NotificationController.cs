@@ -44,7 +44,7 @@ public class NotificationController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetNotificationById(int id)
+    public async Task<IActionResult> GetNotificationById(Guid id)
     {
         var notification = await _notificationService.GetNotificationByIdAsync(id);
         if (notification == null)

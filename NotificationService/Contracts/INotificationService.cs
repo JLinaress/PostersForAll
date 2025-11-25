@@ -9,7 +9,7 @@ public interface INotificationService
     
     Task<List<Notification>> GetAllNotificationsAsync();
     
-    Task<Notification?> GetNotificationByIdAsync(int id);
+    Task<Notification?> GetNotificationByIdAsync(Guid id);
     
     Task<Notification> AddNotificationAsync(Notification notification);
 }
