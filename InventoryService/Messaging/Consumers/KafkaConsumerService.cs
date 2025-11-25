@@ -68,6 +68,9 @@ public class KafkaConsumerService : IKafkaConsumerService
                             }
                         }
                     }
+                    
+                    _consumer.CommitAsync(consumeResult);
+                    _logger.LogInformation($"Processed inventory event: {update?.ProductId}");
                 }
             }
             catch (OperationCanceledException oex)
