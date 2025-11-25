@@ -69,6 +69,7 @@ public class KafkaConsumerService : IKafkaConsumerService
                         }
                     }
                     
+                    // Commit the message offset after successful processing
                     _consumer.CommitAsync(consumeResult);
                     _logger.LogInformation($"Processed inventory event: {update?.ProductId}");
                 }
