@@ -5,10 +5,23 @@ using OrderService.Configuration;
 using OrderService.Contracts;
 using OrderService.Data;
 using OrderService.Services;
+using Prometheus;
+using Serilog;
+using Serilog.Events;
 
 Console.WriteLine("Hello, Let's check our Orders!");
 
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 var kafkaConfig = builder.Configuration.GetSection("Kafka");
 var bootstrapServers = kafkaConfig.GetValue<string>("BootstrapServers") ?? "localhost:9092";
 
@@ -21,12 +34,20 @@ builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
 
 // Register Kafka Producer Service with environment variable configuration
 builder.Services.Configure<KafkaSettings>(
-    builder.Configuration.GetSection("Kafka:Topic"));
+    builder.Configuration.GetSection("Kafka"));
 builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+//serilog request logging middleware
+app.UseSerilogRequestLogging();
+// Collect HTTP metrics
+app.UseHttpMetrics();
+
+// Expose the /metrics endpoint for Prometheus to scrape
+app.UseMetricServer();
 
 app.MapControllers();
 

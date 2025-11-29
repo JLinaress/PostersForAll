@@ -1,17 +1,17 @@
 // Business logic for managing inventory
 // This class will implement methods to create, retrieve, and cancel orders
-
-using Newtonsoft.Json;
-
 namespace OrderService.Services;
 
-using Microsoft.EntityFrameworkCore;
 using Contracts;
 using Data;
+using Microsoft.EntityFrameworkCore;
 using Models;
+using Newtonsoft.Json;
+using Prometheus;
 
 public class OrderService : IOrderService
 {
+    private static readonly Counter OrderCreatedCounter = Metrics.CreateCounter("order_created_total", "Total number of orders created");
     private readonly OrdersContext _context;
     private readonly IKafkaProducerService _kafkaProducerService;
     
@@ -38,6 +38,9 @@ public class OrderService : IOrderService
         
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
+        
+        // Increment Prometheus counter
+        OrderCreatedCounter.Inc();
         
         // Publish kafka event 
         var orderPlacedEvent = JsonConvert.SerializeObject(new
