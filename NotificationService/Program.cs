@@ -9,11 +9,25 @@ using NotificationService.Data;
 using NotificationService.Messaging.Client;
 using NotificationService.Messaging.Consumer;
 using NotificationService.Services;
+using Prometheus;
+using Serilog;
 using NotificationServices = NotificationService.Services.NotificationService;
 
 Console.WriteLine("Hello, You've got a Notification!");
 
+// configure serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// This adds the DiagnosticContext service
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddOpenApi();
@@ -65,6 +79,13 @@ builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+//serilog request logging middleware
+app.UseSerilogRequestLogging();
+// Collect HTTP metrics
+app.UseHttpMetrics();
+// Expose the /metrics endpoint for Prometheus to scrape
+app.UseMetricServer();
 
 app.MapControllers();
 

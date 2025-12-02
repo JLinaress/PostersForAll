@@ -2,14 +2,16 @@
 // This class will implement methods to send notifications and retrieve notification history
 namespace NotificationService.Services;
 
-using Microsoft.EntityFrameworkCore;
 using Contracts;
 using Data;
+using Microsoft.EntityFrameworkCore;
 using Models;
+using Prometheus;
 using System.Text.Json;
 
 public class NotificationService : INotificationService
 {
+    private readonly Counter NotificationCreatedCounter = Metrics.CreateCounter("notification_created_total", "Total number of notifications created");
     private readonly NotificationContext _context;
     private readonly IKafkaProducerService _kafkaProducer;
 
@@ -45,6 +47,9 @@ public class NotificationService : INotificationService
         try
         {
             await _context.SaveChangesAsync();
+            
+            // Increment Prometheus counter
+            NotificationCreatedCounter.Inc();
         }
         // Revisit and clean up. No need to throw exception here 
         catch (DbUpdateException ex) when ((ex.InnerException as Microsoft.Data.Sqlite.SqliteException)?.SqliteErrorCode == 19)
