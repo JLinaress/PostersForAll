@@ -8,11 +8,25 @@ using InventoryService.Messaging.Consumers;
 using InventoryService.Messaging.HandlerMessage;
 using InventoryService.Services;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
+using Serilog;
 using InventoryServices = InventoryService.Services.InventoryService;
 
 Console.WriteLine("Hello, Lets check our Inventory!");
 
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// This adds the DiagnosticContext service
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddOpenApi();
@@ -65,6 +79,12 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<InventoryContext>();
+    context.Database.EnsureCreated();  // Creates tables based on OnModelCreating
+}
+
 // This will give you a swagger browser to test GET/POST 
 // TODO
 // this is a Swagger middleware and need to come back and ensure it's only active in development mode
@@ -74,6 +94,13 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "InventoryService V1");
     c.RoutePrefix = string.Empty;
 });
+
+//serilog request logging middleware
+app.UseSerilogRequestLogging();
+// Collect HTTP metrics
+app.UseHttpMetrics();
+// Expose the /metrics endpoint for Prometheus to scrape
+app.UseMetricServer();
 
 app.MapControllers();
 

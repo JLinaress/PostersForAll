@@ -7,9 +7,14 @@ using Data;
 using Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Prometheus;
 
 public class InventoryService : IInventoryService
 {
+    private static readonly Counter InventoryUpdatedCounter = Metrics.CreateCounter("inventory_updated_total", "Total number of inventory updates");
+    private static readonly Counter InventoryCounter = Metrics
+        .CreateCounter("inventory_updates_total", "Inventory updates", 
+            new[] { "status", "product_id" });
     private readonly InventoryContext _context;
     private readonly IKafkaProducerService _kafkaProducerService;
     
@@ -48,6 +53,9 @@ public class InventoryService : IInventoryService
             
             _context.InventoryItems.Add(item);
 
+            // Counter for created inventory items
+            InventoryCounter.WithLabels("created", update.ProductId.ToString()).Inc();
+            
             result = InventoryChangeResult.Created;
         }
         else
@@ -60,11 +68,16 @@ public class InventoryService : IInventoryService
 
             item.LastUpdated = update.EventTimestamp;
 
+            // Counter for updated inventory items
+            InventoryCounter.WithLabels("updated", update.ProductId.ToString()).Inc();
             result = InventoryChangeResult.Updated;
         }
 
         // save changes to the database
         await _context.SaveChangesAsync();
+        
+        // Increment Prometheus counter
+        InventoryUpdatedCounter.Inc();
         
         // Optionally, publish an inventory update event to Kafka
         var inventoryEvent = new InventoryUpdateEvent
