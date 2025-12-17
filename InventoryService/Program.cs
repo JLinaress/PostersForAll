@@ -44,7 +44,7 @@ builder.Services.AddSingleton<IConsumer<string, string>>(sp =>
     var config = new ConsumerConfig
     {
         // using environment variables for explicit runtime overrides (Helm/Kubernetes secrets or config maps)
-        BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "localhost:9092",
+        BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "kafka:9092",
         GroupId = Environment.GetEnvironmentVariable("KAFKA_CONSUMER_GROUP_ID") ?? "inventory-service-consumer",
         AutoOffsetReset = AutoOffsetReset.Earliest
     };
@@ -55,7 +55,7 @@ builder.Services.AddSingleton<IProducer<string, string>>(sp =>
 {
     var config = new ProducerConfig
     {
-        BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "localhost:9092",
+        BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "kafka:9092",
         ClientId = "inventory-service-producer"
     };
     return new ProducerBuilder<string, string>(config).Build();
