@@ -11,21 +11,47 @@ public class KafkaProducerService : IKafkaProducerService
     private readonly IProducer<string, string> _producer;
     private readonly string _topic;
 
-    public KafkaProducerService(IOptions<KafkaConsumerSettings> settings, IProducer<string, string> producer)
+    public KafkaProducerService(IOptions<KafkaConsumerSettings> settings)
     {
-        _topic = settings.Value.Topic ?? throw new ArgumentNullException(nameof(settings.Value.Topic));
-        _producer = producer;
+        var setting = settings.Value;
+        _topic = setting.Topic!;
+        
+        var config = new ProducerConfig
+        {
+            BootstrapServers = settings.Value.BootstrapServers,
+            ClientId = "notification-service-producer"
+        };
+        
+        _producer = new ProducerBuilder<string, string>(config).Build();
+        
+        // startup logging for dev / demo purposes
+        Console.WriteLine($"✅ Kafka PRODUCER initialized in NotificationService {config.BootstrapServers}");
     }
 
     public async Task ProduceNotificationEventAsync(string key, string value)
     {
-        var kafkaMessage = new Message<string, string>
+        try
         {
-            Key = key,
-            Value = value
-        };
 
-        await _producer.ProduceAsync(_topic, kafkaMessage);
-        // Optionally handle delivery reports or errors here later on
+            var kafkaMessage = new Message<string, string>
+            {
+                Key = key,
+                Value = value
+            };
+
+            var deliveryResult = await _producer.ProduceAsync(_topic, kafkaMessage);
+
+            // Log the delivery result to console, can come back later and remove it when not needed
+            Console.WriteLine($"Delivered '{deliveryResult.Value}' to '{deliveryResult.TopicPartitionOffset}'");
+        }
+        catch (KafkaException ex)
+        {
+            // Handle Kafka-specific exception
+            Console.WriteLine($"Kafka error producing message: {ex.Error.Reason}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Delivery failed: {ex.Message}");
+        }
     }
 }

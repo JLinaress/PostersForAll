@@ -37,7 +37,7 @@
     ports:
       - "5001:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__OrderDb=Data Source=/app/orders.db
       - KafkaProducerSettings__BootstrapServers=kafka:29092
     volumes:
@@ -59,9 +59,8 @@
     ports:
       - "5224:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__InventoryDb=/app/inventory.db
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KafkaConsumerSettings__BootstrapServers=kafka:29092
     volumes:
       - inventory-data:/app
@@ -77,7 +76,7 @@
     ports:
       - "5003:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__NotificationDb=Data Source=/app/notifications.db
       - KafkaConsumerSettings__BootstrapServers=kafka:29092
     volumes:

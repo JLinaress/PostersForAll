@@ -1,9 +1,6 @@
 // Register DbContext and Configure Dependency Injection
-using Confluent.Kafka;
-using InventoryService.Configurations;
 using InventoryService.Contracts;
 using InventoryService.Data;
-using InventoryService.Messaging.Clients;
 using InventoryService.Messaging.Consumers;
 using InventoryService.Messaging.HandlerMessage;
 using InventoryService.Services;
@@ -24,9 +21,10 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-
 // This adds the DiagnosticContext service
 builder.Host.UseSerilog();
+var kafkaConfig = builder.Configuration.GetSection("Kafka");
+var bootstrapServers = kafkaConfig.GetValue<string>("BootstrapServers") ?? "localhost:9092";
 
 // Add services to the container.
 builder.Services.AddOpenApi();
@@ -38,38 +36,10 @@ builder.Services.AddDbContext<InventoryContext>(options =>
 // Register other services, repositories, etc.
 builder.Services.AddScoped<IInventoryService, InventoryServices>();
 
-// Register the underlying kafka IConsumer and IProducer client
-builder.Services.AddSingleton<IConsumer<string, string>>(sp =>
-{
-    var config = new ConsumerConfig
-    {
-        // using environment variables for explicit runtime overrides (Helm/Kubernetes secrets or config maps)
-        BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "kafka:9092",
-        GroupId = Environment.GetEnvironmentVariable("KAFKA_CONSUMER_GROUP_ID") ?? "inventory-service-consumer",
-        AutoOffsetReset = AutoOffsetReset.Earliest
-    };
-    return new ConsumerBuilder<string, string>(config).Build();
-});
-
-builder.Services.AddSingleton<IProducer<string, string>>(sp =>
-{
-    var config = new ProducerConfig
-    {
-        BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") ?? "kafka:9092",
-        ClientId = "inventory-service-producer"
-    };
-    return new ProducerBuilder<string, string>(config).Build();
-});
-
 // Register Kafka Producer Service with environment variable configuration
 builder.Services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
 builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddSingleton<IMessageHandlerService, MessageHandlerService>();
-builder.Services.Configure<KafkaConsumerSettings>(builder.Configuration.GetSection("KafkaConsumerSettings"));
-
-// Kafka client wrapper
-builder.Services.AddSingleton<IKafkaConsumerClient, KafkaConsumerClient>();
-builder.Services.AddSingleton<IKafkaProducerClient, KafkaProducerClient>();
 
 // Adding Swagger to inspect your API endpoints / data
 builder.Services.AddEndpointsApiExplorer();

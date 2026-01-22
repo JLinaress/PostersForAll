@@ -24,6 +24,9 @@ public class KafkaProducerService : IKafkaProducerService
         };
         
         _producer = new ProducerBuilder<string, string>(config).Build();
+        
+        // startup logging for dev / demo purposes
+        Console.WriteLine($"✅ Kafka PRODUCER initialized in OrderService {config.BootstrapServers}");
     }
     
     public async Task ProduceOrderEventMessageAsync(string key, string message)
