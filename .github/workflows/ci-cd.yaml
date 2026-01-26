@@ -5,71 +5,71 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-    
+
 jobs:
   build-test-publish-deploy:
     runs-on: ubuntu-latest
-    
-  env: 
-    REGISTRY: ghcr.io
-    IMAGE_NAME: postersforall
-    IMAGE_TAG: ${{ github.sha }}
-    OWNER: jlinaress
-    
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-  # 1. SETUP .NET
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
-      
-    - name: Restore
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-      
-    - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
-      
-  # 2. BUILD AND PUSH DOCKER IMAGES TO GHCR
-  - name: Log in to GHCR
-    run: echo "${{ secrets.GHCR_TOKEN || github.token }}" | docker login ${{ env.REGISTRY }} -u ${{ env.OWNER }} --password-stdin
-    
-  # 3. Build and push images for all services
-  - name: Build and Push OrderService Image
-    run: |
-      docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:orderservice-${{ env.IMAGE_TAG }} -f ./OrderService/Dockerfile ./OrderService
-      docker push ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:orderservice-${{ env.IMAGE_TAG }}
-      
-  - name: Build and Push InventoryService Image
-    run: |
-      docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:inventoryservice-${{ env.IMAGE_TAG }} -f ./InventoryService/Dockerfile ./InventoryService
-      docker push ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:inventoryservice-${{ env.IMAGE_TAG }}
-      
-  - name: Build and Push NotificationService Image
-    run: |
-      docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:notificationservice-${{ env.IMAGE_TAG }} -f ./NotificationService/Dockerfile ./NotificationService
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: postersforall
+      IMAGE_TAG: ${{ github.sha }}
+      OWNER: jlinaress
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 1. SETUP .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+
+      # 2. BUILD AND PUSH DOCKER IMAGES TO GHCR
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN || github.token }}" | docker login ${{ env.REGISTRY }} -u ${{ env.OWNER }} --password-stdin
+
+      # 3. Build and push images for all services
+      - name: Build and Push OrderService Image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:orderservice-${{ env.IMAGE_TAG }} -f ./OrderService/Dockerfile ./OrderService
+          docker push ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:orderservice-${{ env.IMAGE_TAG }}
+
+      - name: Build and Push InventoryService Image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:inventoryservice-${{ env.IMAGE_TAG }} -f ./InventoryService/Dockerfile ./InventoryService
+          docker push ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:inventoryservice-${{ env.IMAGE_TAG }}
+
+      - name: Build and Push NotificationService Image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:notificationservice-${{ env.IMAGE_TAG }} -f ./NotificationService/Dockerfile ./NotificationService
           docker push ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:notificationservice-${{ env.IMAGE_TAG }}
-      
-  # 4. Configure kubectl for local k3d (using saved kubeconfig)
-  - name: Set up kubeconfig
-    run: |
-      mkdir -p $HOME/.kube
-      echo "${{ secrets.KUBECONFIG_K3D }}" > $HOME/.kube/config
-      
-  # 5. Install Helm
-  - name: Install Helm
-    uses: azure/setup-helm@v4
-    
-  # 6. Helm Upgrade (deploy new images)
-  - name: Deploy to k3d via Helm
-    run: |
-      helm upgrade --install postersforall ./helm \
-        --namespace posters-dev \
-        --create-namespace \
-        --set image.repository=${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }} \
-        --set image.tag=${{ env.IMAGE_TAG }}
+
+      # 4. Configure kubectl for local k3d (using saved kubeconfig)
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_K3D }}" > $HOME/.kube/config
+
+      # 5. Install Helm
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      # 6. Helm Upgrade (deploy new images)
+      - name: Deploy to k3d via Helm
+        run: |
+          helm upgrade --install postersforall ./helm \
+            --namespace posters-dev \
+            --create-namespace \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ env.IMAGE_TAG }}
