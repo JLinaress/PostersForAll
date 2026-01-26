@@ -20,7 +20,17 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://+:8080"); // Listen on port 8080
+if (builder.Environment.IsDevelopment())
+{
+    // Use launchSettings.json port for local development (5198)
+    // Dev mode message
+    Console.WriteLine("Local Dev Mode detected. Using launchSettings.json port.");
+}
+else
+{
+    // Kubernetes deployment : Force port 8080 binding : PROD
+    builder.WebHost.UseUrls("http://+:8080"); // Listen on port 8080
+}
 builder.Host.UseSerilog();
 var kafkaConfig = builder.Configuration.GetSection("Kafka");
 var bootstrapServers = kafkaConfig.GetValue<string>("BootstrapServers") ?? "localhost:9092";
