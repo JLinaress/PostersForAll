@@ -1,5 +1,4 @@
 // Register DbContext and Configure Dependency Injection
-
 using Microsoft.EntityFrameworkCore;
 using OrderService.Configuration;
 using OrderService.Contracts;
@@ -21,6 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://+:8080"); // Listen on port 8080
 builder.Host.UseSerilog();
 var kafkaConfig = builder.Configuration.GetSection("Kafka");
 var bootstrapServers = kafkaConfig.GetValue<string>("BootstrapServers") ?? "localhost:9092";
@@ -40,6 +40,8 @@ builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+app.MapGet("/Health", () => Results.Ok(new { status = "Order Service is healthy" }));
 
 //serilog request logging middleware
 app.UseSerilogRequestLogging();

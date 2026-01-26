@@ -1,0 +1,30 @@
+image:
+  repository: ghcr.io/jlinaress
+  tag: "latest"
+  pullPolicy: Always
+    
+replicaCount: 1
+
+services:
+  orderservice:
+    image: orderservice
+    port: 8080
+    kafkaTopic: "order-events"
+    dbPath: "/app/orders.db"
+    
+  inventoryservice:
+    image: inventoryservice
+    port: 8080
+    kafkaTopic: "inventory-events"
+    dbPath: "/app/inventory.db"
+    
+  notificationservice:
+    image: notificationservice
+    port: 8080
+    kafkaTopic: "notification-events"
+    dbPath: "/app/notifications.db"
+    
+kafka:
+    bootstrapServers: "kafka-headless.kafka.svc.cluster.local:9092"
+    
+namespace: posters-dev

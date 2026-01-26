@@ -21,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://+:8080"); // Listen on port 8080
 // This adds the DiagnosticContext service
 builder.Host.UseSerilog();
 
@@ -49,6 +49,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+app.MapGet("/Health", () => "Notification Service is healthy");
 
 //serilog request logging middleware
 app.UseSerilogRequestLogging();

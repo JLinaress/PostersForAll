@@ -21,6 +21,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://+:8080"); // Listen on port 8080
 // This adds the DiagnosticContext service
 builder.Host.UseSerilog();
 var kafkaConfig = builder.Configuration.GetSection("Kafka");
@@ -48,6 +49,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+app.MapGet("/Health", () => "Inventory Service is healthy");
 
 using (var scope = app.Services.CreateScope())
 {

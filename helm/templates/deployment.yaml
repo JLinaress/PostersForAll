@@ -1,0 +1,68 @@
+{{- range $serviceName, $service := .Values.services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $serviceName }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $serviceName }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $serviceName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $serviceName }}
+    spec:
+      containers:
+        - name: {{ $serviceName }}
+          image: "{{ $.Values.image.repository }}/{{ $service.image }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $service.port }}
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_URLS
+              value: "http://+:{{ $service.port }}"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "{{ $service.port }}"
+            - name: Kafka__BootstrapServers
+              value: {{ $.Values.kafka.bootstrapServers }}
+            - name: KAFKA_TOPIC
+              value: {{ $service.kafkaTopic }}
+            - name: ConnectionStrings__DefaultConnection
+              value: "Data Source={{ $service.dbPath }}"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - mountPath: {{ $service.dbPath | quote }}
+              name: data
+        volumes: 
+          - name: data
+            emptyDir: {}
+      restartPolicy: Always
+  {{- end }}
