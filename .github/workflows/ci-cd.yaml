@@ -54,22 +54,3 @@ jobs:
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:notificationservice-${{ env.IMAGE_TAG }} -f ./NotificationService/Dockerfile ./NotificationService
           docker push ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:notificationservice-${{ env.IMAGE_TAG }}
-
-      # 4. Configure kubectl for local k3d (using saved kubeconfig)
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_K3D }}" > $HOME/.kube/config
-
-      # 5. Install Helm
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-
-      # 6. Helm Upgrade (deploy new images)
-      - name: Deploy to k3d via Helm
-        run: |
-          helm upgrade --install postersforall ./helm \
-            --namespace posters-dev \
-            --create-namespace \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }} \
-            --set image.tag=${{ env.IMAGE_TAG }}
