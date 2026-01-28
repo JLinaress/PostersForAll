@@ -57,7 +57,7 @@
       dockerfile: Dockerfile
     container_name: inventoryservice
     ports:
-      - "5224:80"
+      - "5002:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__InventoryDb=/app/inventory.db

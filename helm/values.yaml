@@ -25,6 +25,6 @@ services:
     dbPath: "/app/notifications.db"
     
 kafka:
-    bootstrapServers: "kafka-headless.kafka.svc.cluster.local:9092"
+    bootstrapServers: "host.docker.internal:29092"
     
 namespace: posters-dev
